@@ -1,12 +1,14 @@
 #!/bin/bash
 
-if [ $# -lt 1 ]; then
+if [ $# -lt 3 ]; then
 	echo -e "USAGE:\n"
 	echo -e "\tprepare.sh [SUBMISSIONS_FOLDER]"
 	exit 1
 fi
 
 SUBMISSIONS_FOLDER=$1
+REPORSTS_FOLDER=$2
+ARCHIVE_FILE=$3
 
 # Funcs --------------------------------------------------------------------------
 
@@ -21,7 +23,6 @@ move() {
 	for fm in "${SRC_DIR}"/*; do
 		if 7z t "${fm}"; then 
 			7z x -y "${fm}" -o"${SRC_DIR}"
-			rm "${fm}"
 		fi
 	done
 	# Move file from subdir to dir
@@ -30,8 +31,6 @@ move() {
 			move "${fm}" "${DST_DIR}"
 			rm -r "${fm}"
 		elif [ "${SRC_DIR}" != "${DST_DIR}" ]; then
-			echo convert ${fm}
-			dos2unix ${fm}
 			mv "${fm}" "${DST_DIR}"
 		fi
 	done
@@ -39,7 +38,16 @@ move() {
 
 # Main ---------------------------------------------------------------------------
 
-for f in "${SUBMISSIONS_FOLDER}"/*; do
+rep_dir="${REPORSTS_FOLDER}/"$(basename ${ARCHIVE_FILE})
+mkdir -p "${rep_dir}"
+
+sub_dir="${SUBMISSIONS_FOLDER}/"$(basename ${ARCHIVE_FILE})
+mkdir -p "${sub_dir}"
+cp "${ARCHIVE_FILE}" "${sub_dir}"
+7z x -y "${ARCHIVE_FILE}" -o"${sub_dir}"
+rm "${ARCHIVE_FILE}"
+
+for f in "${sub_dir}"/*; do
 	if [ -d "${f}" ]; then
 		move "${f}" "${f}"
 		for ff in "${f}"/*; do
@@ -47,6 +55,7 @@ for f in "${SUBMISSIONS_FOLDER}"/*; do
 				mv "${ff}" "${sub_dir}/${f##*/}_${ff##*/}"
 			fi
 		done
+		rm -r "${f}"
 	fi
 done
 

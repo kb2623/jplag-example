@@ -1,16 +1,24 @@
 #!/bin/bash
 
-if [ $# -lt 3 ]; then
-	echo -e "USAGE:\n"
-	echo -e "\tprepare.sh [SUBMISSIONS_FOLDER]"
-	exit 1
-fi
+# Sript moves 
 
-SUBMISSIONS_FOLDER=$1
-REPORSTS_FOLDER=$2
-ARCHIVE_FILE=$3
+# Parameters ---------------------------------------------------------------------
+
+SUBMISSIONS_FOLDER=sub
+REPORSTS_FOLDER=rep
+ARCHIVE_FILE=''
+HELP=0
 
 # Funcs --------------------------------------------------------------------------
+
+printHelp() {
+	echo -e 'USAGE:'
+	echo -e '\tprepare [OPTIONS] [ARCHIVE_FILE]\n'
+	echo -e 'OPTIONS:'
+	echo -e '\t-s\t[PATH]\tSubmissions folder'
+	echo -e '\t-r\t[PATH]\tReports folder'
+	echo -e '\t-h --help\tPrint this message'
+}
 
 # move - move file from subdirectoriys
 # Usage: move [SRC_DIR] [DST_DIR]
@@ -37,6 +45,22 @@ move() {
 }
 
 # Main ---------------------------------------------------------------------------
+
+while [[ "$#" -gt 0  ]]; do case $1 in
+	-h|--help) HELP=1;;
+	-s) SUBMISSIONS_FOLDER=$2; shift;;
+	-r) REPORSTS_FOLDER=$2; shift;;
+	*) ARCHIVE_FILE=$1;;
+esac; shift; done
+
+if [ $HELP -eq 1  ]; then
+	printHelp
+	exit 0
+fi
+if [ "${ARCHIVE_FILE}" == "" ]; then
+	printHelp
+	exit 1
+fi
 
 rep_dir="${REPORSTS_FOLDER}/"$(basename ${ARCHIVE_FILE})
 mkdir -p "${rep_dir}"

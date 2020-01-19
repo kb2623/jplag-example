@@ -17,8 +17,8 @@ all: jplag
 jplag: resDir extract fixFiles
 	java -jar jplag.jar -l ${LANGUAGE} -m ${JPLAG_SAVE_SIM}% -r ${RES_DIR} -s ${SUB_DIR} -o ${JPLAG_LOG_OUT}
 
-moss: prepare
-	moss_run ${MOSS_ID} "${SUB_DIR}" ${LANGUAGE} ${MOSS_FILES_POSTFIX} "${RES_DIR}"
+moss:
+	pipenv run moss_run ${MOSS_ID} "${SUB_DIR}" ${LANGUAGE} ${MOSS_FILES_POSTFIX} "${RES_DIR}"
 
 resDir:
 	mkdir -p ${RES_DIR}
@@ -32,8 +32,13 @@ prepare: ${ARCH_FILE}
 	prepare -s ${SUB_DIR} -r ${RES_DIR} ${ARCH_FILE}
 
 fixFiles:
-	find ${SUB_DIR} -type f -iname '*.cpp' -o -iname '*.hpp' | while read d; do \
+	find ${SUB_DIR} -type f -iname '*.${MOSS_FILES_POSTFIX}' -iname '*.cpp' -o -iname '*.hpp' | while read d; do \
 		dos2unix "$${d}"; \
 		LC_ALL=C sed -i 's/[^[:blank:][:print:]]//g' "$${d}"; \
 	done
 
+install:
+	pipenv install
+
+uninstall:
+	pipenv --rm
